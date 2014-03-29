@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1>Manage Feeds</h1>
+<p>Subscribe to periodic snaps from one (or more) of these awesome feeds!</p>
+<div class='feed'>
+<div class='feed-head'>
+<h3>Whisper</h3>
+<button class='btn toggleFeed unsubscribed'>Subscribe</button>
+</div>
+<img src="{{ url_for('static', filename='img/whisper-logo.png') }}" alt="...">
+
+<p>Listen to the secrets of the world.</p>
+
+</div>
+	
+{% endblock %}
