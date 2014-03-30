@@ -1,0 +1,79 @@
+
+/*groups*/
+
+.grouper {
+	text-align: center;
+}
+
+.grouper > div {
+	display: inline-block;
+	width: 300px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.grouper > div > ul {
+	height: 300px;
+	background-color: #F1F2F2;
+	box-shadow: 5px 0px 5px -5px #999, -5px 0px 5px -5px #999;
+	overflow-y: scroll;
+	
+}
+
+
+.arrow {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.grouper > div > ul > li:hover {
+	background-color: #BE90D4;
+	color: #FFF;
+}
+
+.group > .form-group {
+	margin-bottom: 8px;
+}
+
+.group > .form-group > input {
+	font-size: 21px;
+	font-weight: 500;
+	line-height: 1.1;
+	text-align: center;
+}
+
+.panel {
+	box-shadow:none;
+	-webkit-box-shadow: none;
+	background-color: transparent;
+	border: none;
+}
+
+.panel-group .panel {
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+}
+
+.panel-default > .panel-heading {
+	background-image: none;
+	background-color: #F4D03F;
+	box-shadow: 5px 0px 5px -5px #999, -5px 0px 5px -5px #999;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+
+}
+
+.panel-collapse {
+	text-align: center;
+}
+
+.panel-collapse > button {
+	background-color: #F25887;
+	color: #FFF;
+	display: block;
+	margin: 0 auto;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}

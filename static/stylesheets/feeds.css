@@ -1,0 +1,41 @@
+
+
+/* feeds */
+
+.feed {
+	margin-right: 1em;
+	margin-top: 2em;
+	display: inline-block;
+	background-color: #F1F2F2;
+	box-shadow: 5px 0px 5px -5px #999, -5px 0px 5px -5px #999;
+	width: 300px;
+	height: 350px;
+	padding: 2em;
+	overflow: auto;
+}
+
+.feed-head > * {
+	display:inline-block;
+	margin-top: 0;
+	margin-bottom: 2em;
+}
+
+.feed-head > button {
+	float: right;
+	margin-top: -0.3em;
+}
+
+
+.feed > img {
+	width: 70%;
+	margin: auto;
+	display: block;
+	margin-bottom: 2em;
+}
+
+
+.subscribed {
+	background-color: #F25887;
+	color: #FFF;
+}
+
