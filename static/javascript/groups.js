@@ -18,6 +18,8 @@ var rmFriend = function(element) {
 	});
 }
 
+
+
 $(document).ready(function() {
 	$(".friends > ul > .friend").click(function(){
 		addFriend($(this));
@@ -29,6 +31,5 @@ $(document).ready(function() {
 
 	$(".arrow").css("top", "-" + (parseInt($(".friends > ul").css("height")) / 2) + "px");
 
-
-
+	console.log(getFriends());
 });

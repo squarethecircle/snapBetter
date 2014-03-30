@@ -25,4 +25,22 @@
 
 </div>
 
+<script type='text/javascript'>
+
+function sendOneWhisper() {
+	$.ajax({
+		url: '/sendonewhisper',
+		type: 'POST',
+		data: { 'username': "{{session['username']}}", 'auth_token':"{{session['auth_token']}}"},
+		success: function (response) {
+			if (response == 'success')
+				console.log('whisper sent');
+		}
+	});
+}
+
+
+
+</script
+
 {% endblock %}

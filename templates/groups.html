@@ -70,7 +70,27 @@
 </div>
 
 
+<script type='text/javascript'>
+var getFriends = function() {
+	$.ajax({
+		url: '/requests',
+		data: { username: '{{session["username"]}}', auth_token: '{{session["auth_token"]}}', request: "getFriends" },
+		dataType: 'json',
+		type: 'POST',
+		success: function(response) {
+			var names = []
+			for (var i in response) {
+				$.each(i, function(k, v) {
+					if (k == "name")
+						names.append(v);
+				});
+			}
+			return response;
+		}
 
+	});
+}
+</script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='javascript/groups.js') }}"></script>
 
