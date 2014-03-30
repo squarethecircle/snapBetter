@@ -12,31 +12,28 @@
 			</h4>
 		</div>
 		<div id="collapse1" class="panel-collapse collapse in">
-		<div class="panel-body">
-			<div class="grouper">
-				<div class="friends">
-					<h3>Friends</h3>
-					<ul>
-						{% for name in namelist %}
-						<li class="friend">
-							{{ name }}
-						</li>
-						{% endfor %}
-					</ul>
-				</div>
+			<div class="panel-body">
+				<div class="grouper">
+					<div class="friends">
+						<h3>Friends</h3>
+						<ul>
+							
 
-				<span class="glyphicon glyphicon-chevron-right arrow"></span>
-
-				<div class="group">
-					<div class='form-group'>
-						<input type="text" placeholder="Group Name"> 
+						</ul>
 					</div>
-					<ul></ul>
+
+					<span class="glyphicon glyphicon-chevron-right arrow"></span>
+
+					<div class="group">
+						<div class='form-group'>
+							<input type="text" placeholder="Group Name"> 
+						</div>
+						<ul></ul>
+					</div>
 				</div>
 			</div>
+			<button type='button' class='btn' class='create-group'>Create Group</button>
 		</div>
-		<button type='button' class='btn' class='create-group'>Create Group</button>
-	</div>
 	</div>
 	
 	<div class="panel panel-default">
@@ -71,25 +68,29 @@
 
 
 <script type='text/javascript'>
-var getFriends = function() {
-	$.ajax({
-		url: '/requests',
-		data: { username: '{{session["username"]}}', auth_token: '{{session["auth_token"]}}', request: "getFriends" },
-		dataType: 'json',
-		type: 'POST',
-		success: function(response) {
-			var names = []
-			for (var i in response) {
-				$.each(i, function(k, v) {
-					if (k == "name")
-						names.append(v);
+
+	var getFriends = function() {
+		$.ajax({
+			url: '/requests',
+			data: { username: '{{session["username"]}}', auth_token: '{{session["auth_token"]}}', request: "getFriends" },
+			dataType: 'json',
+			type: 'POST',
+			success: function(response) {
+
+				$.each(response.friends, function() {
+					$(".friends > ul").append("<li class='friend' id='" + this['name'] + "'>" + this['display'] + "</li>");
+				});
+				$(".friends > ul > .friend").click(function(){
+					addFriend($(this));
+				});
+
+				$(".group > ul > .friend").click(function(){
+					rmFriend($(this));
 				});
 			}
-			return response;
-		}
 
-	});
-}
+		});
+	}
 </script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='javascript/groups.js') }}"></script>

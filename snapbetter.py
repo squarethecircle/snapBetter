@@ -6,6 +6,7 @@ from flask import request
 from flask import flash
 from flask import redirect
 from flask import url_for
+from flask import jsonify
 import whisperfeed
 import sys
 import uuid
@@ -128,8 +129,9 @@ def requests():
 	 		else:
 	 			return 'false'
 	 	elif request.form['request'] == 'getFriends':
-	 		r = backend.update(request.form['username'], request.form['auth_token'])
-	 		return r['friends']
+			r = backend.update(request.form['username'], request.form['auth_token'])
+	 		return jsonify(r)
+
 
 @app.route('/snaptachanged', methods=['GET'])
 def snaptachanged():
