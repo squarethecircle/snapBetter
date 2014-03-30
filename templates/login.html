@@ -13,16 +13,21 @@
 
 	<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}"/>
 	<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/login.css') }}"/>
+
+	<link rel="icon" 
+      type="image/png" 
+      href="{{ url_for('static', filename='img/ghost.png') }}">
 	<title>snapbetter</title>
 </head>
 <body>
 	
 	<div id="header">
-		<h1>snapbetter</h1>
+		<h1>#snapbetter</h1>
 	</div>
 
 	<div id="login-box">
 		<h2>Log In</h2>
+		<img id='logo' src="{{ url_for('static', filename='img/ghost.png') }}">
 		<form role="form">
 			<div class="form-group">
 			<label for="email">Snapchat Username/Email</label>

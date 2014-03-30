@@ -31,13 +31,13 @@ var toggleFeed = function() {
 		if ($(this).hasClass('unsubscribed')) {
 			console.log('d');
 			var subscribe = '<button type="button" class="btn toggleFeed subscribed">Subscribed</button>';
-			$(".toggleFeed").replaceWith(subscribe);
-			$(".toggleFeed").css('color', '#FFF');
+			$(this).replaceWith(subscribe);
+			$(this).css('color', '#FFF');
 			toggleFeed();
 		} else {
 			console.log('d');
 			var unsubscribe = '<button type="button" class="btn toggleFeed unsubscribed">Subscribe</button>';
-			$(".toggleFeed").replaceWith(unsubscribe);
+			$(this).replaceWith(unsubscribe);
 			toggleFeed();
 		}
 	});

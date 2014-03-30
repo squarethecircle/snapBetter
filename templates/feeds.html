@@ -4,14 +4,25 @@
 <h1>Manage Feeds</h1>
 <p>Subscribe to periodic snaps from one (or more) of these awesome feeds!</p>
 <div class='feed'>
-<div class='feed-head'>
-<h3>Whisper</h3>
-<button class='btn toggleFeed unsubscribed'>Subscribe</button>
-</div>
-<img src="{{ url_for('static', filename='img/whisper-logo.png') }}" alt="...">
+	<div class='feed-head'>
+		<h3>Whisper</h3>
+		<button class='btn toggleFeed unsubscribed'>Subscribe</button>
+	</div>
+	<img src="{{ url_for('static', filename='img/whisper-logo.png') }}" alt="...">
 
-<p>Listen to the secrets of the world.</p>
+	<p>Listen to the secrets of the world.</p>
 
 </div>
-	
+
+<div class='feed'>
+	<div class='feed-head'>
+		<h3>Pinterest</h3>
+		<button class='btn toggleFeed unsubscribed'>Subscribe</button>
+	</div>
+	<img src="{{ url_for('static', filename='img/pinterest-logo.png') }}" alt="...">
+
+	<p>See content from the world's largest pinboard. </p>
+
+</div>
+
 {% endblock %}

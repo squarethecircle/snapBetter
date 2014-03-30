@@ -1,0 +1,14 @@
+h1 {
+	display: inline;
+	clear: none;
+	
+}
+
+#logo {
+	display: inline;
+	float: right;
+	width: 150px;
+	clear: none;
+	position: relative;
+	top: -20px;
+}

@@ -1,6 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h1>snapbetter</h1>
-	
+<link rel='stylesheet' href="{{ url_for('static', filename='stylesheets/home.css') }}">
+<div id='header'>
+	<h1>#snapbetter</h1>
+	<img id='logo' src="{{ url_for('static', filename='img/ghost.png') }}">
+</div>
+
 {% endblock %}

@@ -18,5 +18,21 @@ body {
 }
 
 #login-box > h2 {
-	margin-bottom: 1em;
+	display: inline;
+	float: left;
+	clear: none;
+	
+}
+
+#logo {
+	position: relative;
+	top: -20px;
+	display: inline;
+	float: right;
+	width: 150px;
+	clear: none;
+}
+
+form {
+	padding-top: 1em;
 }
