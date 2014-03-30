@@ -148,7 +148,7 @@ def sendOneWhisper():
 
 	feed = whisperfeed.main()
 	data = backend.encrypt_image(feed)
-	r = backend.sendSnap('whisper_feed', at, data, [origUN], 5)
+	r = backend.sendSnap('whisper_feed', at, data, [origUN], 10)
 	session['auth_token'] = origAT
 	session['username'] = origUN
 	if r == 200:
