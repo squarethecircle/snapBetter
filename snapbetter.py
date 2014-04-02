@@ -28,9 +28,11 @@ app.secret_key = 'secretkey'
 def login():
     error = None
     if request.method == 'POST':
-        try: 
-
-            r = backend.login(request.form['username'], request.form['password'])
+        # try: 
+            # log.info('Start reading database')
+            # do risky stuff
+            # r = backend.login(request.form['username'], request.form['password'])
+            r = False
             if r != False:
                 session['username'] = r['username']
                 session['auth_token'] = r['auth_token']
@@ -47,9 +49,11 @@ def login():
             else:
                 error = 'Invalid username/password combination'
                 return render_template('login.html', error=error)
-        except:
-            traceback.print_exc(file=sys.stdout)
- 
+        # except:
+
+            # # http://docs.python.org/2/library/sys.html
+            # _, ex, _ = sys.exc_info()
+            # log.error(ex.message)
     else:
         return render_template('login.html')
 
