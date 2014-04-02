@@ -103,6 +103,31 @@ def fetchSnap(username, auth_token, idnum):
 	r=requests.post(API_URL+'ph/blob',data=params,headers=HEADERS)
 	return r.content
 
+def unopenedIds(username, auth_token):
+	r = update(username, auth_token)['snaps']
+	unseen = []
+	for snap in r:
+		if 't' in snap:
+			if snap['t'] > 0:
+				unseen.append(snap['id'])
+	return unseen
+
+
+#fetches and decrypts Snap
+def fetchDecryptSnap(username, auth_token, idnum):
+	return decrypt_image(fetchSnap(username, auth_token, idnum))
+
+#fetch and decrypt all unopened snaps
+def fetchUnopenedSnaps(username, auth_token):
+	snaps = []
+	for idnum in unopenedIds(username,auth_token):
+		snaps.append(fetchDecryptSnap(username, auth_token, idnum))
+	return snaps
+
+#login, fetch, and decrypt unopened snaps
+def loginFetchUnopenedSnaps(username, password):
+	return fetchUnopenedSnaps(username, login(username, password)['auth_token'])
+
 
 def sendSnap(username, auth_token, data2, listoffriends, length):
 	media_id=username.capitalize()+'~'+str(uuid.uuid1())
