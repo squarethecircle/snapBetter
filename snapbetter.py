@@ -31,7 +31,7 @@ def login():
         # try: 
             # log.info('Start reading database')
             # do risky stuff
-            # r = backend.login(request.form['username'], request.form['password'])
+            r = backend.login(request.form['username'], request.form['password'])
             r = False
             if r != False:
                 session['username'] = r['username']
