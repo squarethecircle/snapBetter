@@ -28,31 +28,28 @@ app.secret_key = 'secretkey'
 def login():
     error = None
     if request.method == 'POST':
-    # try: 
-        # log.info('Start reading database')
-        # do risky stuff
-        r = backend.login(request.form['username'], request.form['password'])
-        if r != False:
-            session['username'] = r['username']
-            session['auth_token'] = r['auth_token']
+        try: 
 
-            secretSanta = False
-            for friend in r['friends']:
-                if friend['name'] == 'secret_snapta':
-                    secretSanta = True
-                    break
+            r = backend.login(request.form['username'], request.form['password'])
+            if r != False:
+                session['username'] = r['username']
+                session['auth_token'] = r['auth_token']
 
-            session['snapta'] = secretSanta
-            session['snapta_changed'] = 'false'
-            return redirect(url_for('home'))
-        else:
-            error = 'Invalid username/password combination'
-            return render_template('login.html', error=error)
-    # except:
+                secretSanta = False
+                for friend in r['friends']:
+                    if friend['name'] == 'secret_snapta':
+                        secretSanta = True
+                        break
 
-        # # http://docs.python.org/2/library/sys.html
-        # _, ex, _ = sys.exc_info()
-        # log.error(ex.message)
+                session['snapta'] = secretSanta
+                session['snapta_changed'] = 'false'
+                return redirect(url_for('home'))
+            else:
+                error = 'Invalid username/password combination'
+                return render_template('login.html', error=error)
+        except:
+            traceback.print_exc(file=sys.stdout)
+ 
     else:
         return render_template('login.html')
 
