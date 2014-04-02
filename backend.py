@@ -65,6 +65,10 @@ def encrypt_image(s):
 	#newfile=tempfile.NamedTemporaryFile(dir=APP_STATIC)
 
 	return cipher.encrypt(s)
+
+def decrypt_image(s):
+	cipher = AES.new(AES_KEY, AES.MODE_ECB, "")
+	return cipher.decrypt(s)
  
 def request_token(auth_token, timestamp):
 	secret = "iEk21fuwZApXlz93750dmW22pw389dPwOk"
@@ -94,6 +98,12 @@ def deleteFriend(username, auth_token, friend):
 	r=requests.post(API_URL+'ph/friend',data=params,headers=HEADERS)
 	return r.status_code
  
+def fetchSnap(username, auth_token, idnum):
+	params={'username':username, 'req_token':request_token(auth_token,int(time.time())),'timestamp': int(time.time()), 'id': idnum }
+	r=requests.post(API_URL+'ph/blob',data=params,headers=HEADERS)
+	return r.content
+
+
 def sendSnap(username, auth_token, data2, listoffriends, length):
 	media_id=username.capitalize()+'~'+str(uuid.uuid1())
 	keepalive_handler=HTTPHandler()
