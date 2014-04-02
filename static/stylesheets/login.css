@@ -13,7 +13,7 @@ body {
 	padding: 3em;
 	width: 400px;
 	background-color: #F4D03F;
-	border-radius: 2px; 
+	border-radius: 0px 
 	box-shadow: 5px 0px 5px -5px #999, -5px 0px 5px -5px #999;
 }
 
