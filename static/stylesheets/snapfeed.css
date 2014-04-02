@@ -1,0 +1,9 @@
+.snap {
+	display: inline-block;
+
+}
+
+.snap > img {
+	width: 250px;
+	margin-right: 20px;
+}

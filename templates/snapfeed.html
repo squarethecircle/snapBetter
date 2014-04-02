@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>Snapfeed</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/snapfeed.css') }}"/>
+
+{% for file in files %}
+<div class='snap'>
+	<img src='{{file}}'>
+</div>
+
+{% endfor %}
+
+{% endblock %}

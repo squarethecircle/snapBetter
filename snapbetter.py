@@ -10,6 +10,8 @@ import whisperfeed
 import sys
 import backend
 import logging
+from os import listdir
+from os.path import isfile, join
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -23,6 +25,8 @@ logging.basicConfig(level=logging.INFO)
 
 # get the logger for the current Python module
 log = logging.getLogger(__name__)
+
+APP_STATIC = "static/"
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -44,6 +48,11 @@ def login():
 
                 session['snapta'] = secretSanta
                 session['snapta_changed'] = 'false'
+
+
+                backend.createSnapDir(session['username'])
+
+
                 return redirect(url_for('home'))
             else:
                 error = 'Invalid username/password combination'
@@ -81,10 +90,9 @@ def groups():
         error = 'Please log in'
         return render_template('login.html', error=error)
     else:
-        with open('static/namelist') as f:
-            content = f.readlines()
+
         
-        return render_template('groups.html', namelist=content)
+        return render_template('groups.html')
 
 @app.route('/feeds')
 def feeds():
@@ -95,9 +103,23 @@ def feeds():
     else:
         return render_template('feeds.html')
 
+#feed of all snaps
+@app.route('/snapfeed')
+def snapfeed():
+    if not 'auth_token' in session:
+        error = 'Please log in'
+        return render_template('login.html', error=error)
+    else:
+        backend.updateSaveNewSnaps(session['username'], session['auth_token'])
+
+        snappath = APP_STATIC + 'img/snaps/' + session['username']
+        files = [ join(snappath, f) for f in listdir(snappath) if isfile(join(snappath,f)) ]
+        return render_template('snapfeed.html', files=files)
+
 @app.route('/logout')
 def logout():
     error = None
+    backend.deleteSnapDir(session['username'])
     session.pop('username', None)
     session.pop('auth_token', None)
     session.pop('snapta_changed', None)
@@ -146,6 +168,7 @@ def requests():
 @app.route('/snaptachanged', methods=['GET'])
 def snaptachanged():
     return session["snapta_changed"]
+
 
 
 @app.route('/sendonewhisper', methods=['POST'])

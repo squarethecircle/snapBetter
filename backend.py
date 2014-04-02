@@ -4,6 +4,7 @@ import json
 import sys
 import time
 import os
+import shutil
 import tempfile
 from Crypto.Cipher import AES
 import zipfile
@@ -16,6 +17,7 @@ import encode
 import urllib2
 # import httplib2
 from urlgrabber.keepalive import HTTPHandler
+import sha
  
 APP_STATIC='static/'
 API_URL='https://feelinsonice-hrd.appspot.com/'
@@ -103,13 +105,15 @@ def fetchSnap(username, auth_token, idnum):
 	r=requests.post(API_URL+'ph/blob',data=params,headers=HEADERS)
 	return r.content
 
+#fetches IDs of unopened snaps
 def unopenedIds(username, auth_token):
 	r = update(username, auth_token)['snaps']
 	unseen = []
 	for snap in r:
 		if 't' in snap:
 			if snap['t'] > 0:
-				unseen.append(snap['id'])
+				if snap['m'] == 0:
+					unseen.append(snap['id'])
 	return unseen
 
 
@@ -121,12 +125,30 @@ def fetchDecryptSnap(username, auth_token, idnum):
 def fetchUnopenedSnaps(username, auth_token):
 	snaps = []
 	for idnum in unopenedIds(username,auth_token):
-		snaps.append(fetchDecryptSnap(username, auth_token, idnum))
+		snaps.append([idnum, fetchDecryptSnap(username, auth_token, idnum)])
 	return snaps
 
 #login, fetch, and decrypt unopened snaps
-def loginFetchUnopenedSnaps(username, password):
+def logFetchNew(username, password):
 	return fetchUnopenedSnaps(username, login(username, password)['auth_token'])
+
+
+#fetches all snaps and saved unsaved ones
+def updateSaveNewSnaps(username, auth_token):
+	snaps = fetchUnopenedSnaps(username, auth_token)
+	for snap in snaps:
+		if not os.path.exists(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg"):
+			f = open(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg", "w")
+			f.write(snap[1])
+			f.close()
+
+def createSnapDir(username):
+	if not os.path.exists(APP_STATIC + "img/snaps/" + username):
+		os.mkdir(APP_STATIC + "img/snaps/" + username)
+
+def deleteSnapDir(username):
+	if os.path.exists(APP_STATIC + "img/snaps/" + username):
+		shutil.rmtree(APP_STATIC + "img/snaps/" + username)
 
 
 def sendSnap(username, auth_token, data2, listoffriends, length):
