@@ -9,7 +9,7 @@ from flask import jsonify
 import whisperfeed
 import sys
 import backend
-# import logging
+import logging
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -19,20 +19,19 @@ app = Flask(__name__)
 app.secret_key = 'secretkey'
 
 # Defaults to stdout
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
-# # get the logger for the current Python module
-# log = logging.getLogger(__name__)
+# get the logger for the current Python module
+log = logging.getLogger(__name__)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
-        # try: 
-            # log.info('Start reading database')
+        try: 
+            log.info('Start reading database')
             # do risky stuff
             r = backend.login(request.form['username'], request.form['password'])
-            r = False
             if r != False:
                 session['username'] = r['username']
                 session['auth_token'] = r['auth_token']
@@ -49,11 +48,11 @@ def login():
             else:
                 error = 'Invalid username/password combination'
                 return render_template('login.html', error=error)
-        # except:
+        except:
 
-            # # http://docs.python.org/2/library/sys.html
-            # _, ex, _ = sys.exc_info()
-            # log.error(ex.message)
+            # http://docs.python.org/2/library/sys.html
+            _, ex, _ = sys.exc_info()
+            log.error(ex.message)
     else:
         return render_template('login.html')
 
