@@ -59,18 +59,25 @@ def login(username,password):
 def update(username,auth_token):
 	params={'timestamp':int(time.time()),'req_token':request_token(auth_token,int(time.time())),'username':username}
 	r=requests.post(API_URL+'/bq/updates',data=params,headers=HEADERS)
-	return r.json()
+	if r.status_code == 200:
+		return r.json()
+	else:
+		return False
 
 def encrypt_image(s):
-	s =s + (16 - len(s) % 16) * chr(16 - len(s) % 16)
-	cipher = AES.new(AES_KEY, AES.MODE_ECB, "")
-	#newfile=tempfile.NamedTemporaryFile(dir=APP_STATIC)
-
-	return cipher.encrypt(s)
+	if s:
+		s =s + (16 - len(s) % 16) * chr(16 - len(s) % 16)
+		cipher = AES.new(AES_KEY, AES.MODE_ECB, "")
+		return cipher.encrypt(s)
+	else:
+		return False
 
 def decrypt_image(s):
-	cipher = AES.new(AES_KEY, AES.MODE_ECB, "")
-	return cipher.decrypt(s)
+	if s:
+		cipher = AES.new(AES_KEY, AES.MODE_ECB, "")
+		return cipher.decrypt(s)
+	else:
+		return False
  
 def request_token(auth_token, timestamp):
 	secret = "iEk21fuwZApXlz93750dmW22pw389dPwOk"
@@ -83,12 +90,18 @@ def request_token(auth_token, timestamp):
 def requestVerificationCode(username,auth_token,phoneNumber):
 	params={'username':username,'action':'updatePhoneNumber','countryCode':'US','phoneNumber':phoneNumber,'req_token':request_token(auth_token,int(time.time())),'timestamp':int(time.time())}
 	r=requests.post(API_URL+'ph/settings',data=params,headers=HEADERS)
-	return r.json()
+	if r.status_code == 200:
+		return r.json()
+	else:
+		return False
 
 def verifyCode(username,auth_token,code):
 	params={'username':username,'action':'verifyPhoneNumber','code':code,'req_token':request_token(auth_token,int(time.time())),'timestamp':timestamp}
 	r=requests.post(API_URL+'ph/settings',data=params,headers=HEADERS)
-	return r.json()
+	if r.status_code == 200:
+		return r.json()
+	else:
+		return False
 
 def makeFriend(username, auth_token, friend):
 	params={'username': username, 'timestamp':int(time.time()),'req_token':request_token(auth_token,int(time.time())),'action': 'add', 'friend': friend}
@@ -103,19 +116,24 @@ def deleteFriend(username, auth_token, friend):
 def fetchSnap(username, auth_token, idnum):
 	params={'username':username, 'req_token':request_token(auth_token,int(time.time())),'timestamp': int(time.time()), 'id': idnum }
 	r=requests.post(API_URL+'ph/blob',data=params,headers=HEADERS)
-	return r.content
+	if r.status_code == 200:
+		return r.content
+	else:
+		return False
 
 #fetches IDs of unopened snaps
 def unopenedIds(username, auth_token):
-	r = update(username, auth_token)['snaps']
-	unseen = []
-	for snap in r:
-		if 't' in snap:
-			if snap['t'] > 0:
-				if snap['m'] == 0:
-					unseen.append(snap['id'])
-	return unseen
-
+	r = update(username, auth_token)
+	if r:
+		unseen = []
+		for snap in r['snaps']:
+			if 't' in snap:
+				if snap['t'] > 0:
+					if snap['m'] == 0:
+						unseen.append(snap['id'])
+		return unseen
+	else:
+		return False
 
 #fetches and decrypts Snap
 def fetchDecryptSnap(username, auth_token, idnum):
@@ -124,23 +142,26 @@ def fetchDecryptSnap(username, auth_token, idnum):
 #fetch and decrypt all unopened snaps
 def fetchUnopenedSnaps(username, auth_token):
 	snaps = []
-	for idnum in unopenedIds(username,auth_token):
-		snaps.append([idnum, fetchDecryptSnap(username, auth_token, idnum)])
-	return snaps
-
-#login, fetch, and decrypt unopened snaps
-def logFetchNew(username, password):
-	return fetchUnopenedSnaps(username, login(username, password)['auth_token'])
-
+	r = unopenedIds(username,auth_token)
+	if r:
+		for idnum in r:
+			snaps.append([idnum, fetchDecryptSnap(username, auth_token, idnum)])
+		return snaps
+	else:
+		return False
 
 #fetches all snaps and saved unsaved ones
 def updateSaveNewSnaps(username, auth_token):
 	snaps = fetchUnopenedSnaps(username, auth_token)
-	for snap in snaps:
-		if not os.path.exists(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg"):
-			f = open(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg", "w")
-			f.write(snap[1])
-			f.close()
+	if snaps:
+		for snap in snaps:
+			if not os.path.exists(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg"):
+				f = open(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg", "w")
+				f.write(snap[1])
+				f.close()
+		return True
+	else:
+		return False
 
 def createSnapDir(username):
 	if not os.path.exists(APP_STATIC + "img/snaps/" + username):
