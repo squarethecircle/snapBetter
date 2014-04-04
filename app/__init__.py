@@ -7,3 +7,6 @@ db = SQLAlchemy(app)
 
 from app import views, models
 
+db.drop_all()
+db.create_all()
+

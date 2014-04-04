@@ -1,7 +1,11 @@
+from app import db
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username=db.Column(db.String(50), unique = True)
-    token=db.Column(db.String(50),unique = True)
+    password = db.Column(db.String(50), nullable = True)
+    token=db.Column(db.String(50), nullable = True)
+    cookie=db.Column(db.String(50),nullable=True)
     
     def __repr__(self):
         return '<User %r>' % (self.username)
@@ -27,5 +31,16 @@ class Group(db.Model):
         return '<Group %d, owned by %r>' % (self.group_id, self.owner.username)
 
 class SecretSanta(db.Model):
-    id = db.Column(db.Integer.primary_key=True)
+    id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String(50))
+    imagesent = db.Column(db.String(50))
+
+    def __repr__(self):
+        return '<Image %r sent by %r>' % (self.imagesent, self.username)
+
+class Snap(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    sentfrom = db.Column(db.String(50),index=True)
+    sentto = db.Column(db.String(50),index=True)
+    file = db.Column(db.String(50))
+    timesent = db.Column(db.Integer,index=True)
