@@ -12,10 +12,11 @@ import numpy as np
 # import cv2
 import shutil
 import uuid
-from requests_toolbelt import MultipartEncoder
 import encode
 import urllib2
 # import httplib2
+from app import models as models
+from app import db as db
 from urlgrabber.keepalive import HTTPHandler
 import sha
  
@@ -24,7 +25,9 @@ API_URL='https://feelinsonice-hrd.appspot.com/'
 AES_KEY='M02cnQ51Ji97vwT4'
 STATIC_TOKEN='m198sOkJEn37DjqZ32lpRu76xmw288xSQ9'
 HEADERS={'User-agent': 'Snapchat/6.1.2 (iPhone5,1; iOS 7.1; gzip)'}
- 
+SS_USERNAME='secret_snapta'
+SS_PASSWORD='3stacksqSort'
+
 def register(username, email, password, age, birthday):
 	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'email':email,'password':password,'age':int(age),'birthday':birthday}
 	r=requests.post(API_URL+'bq/register',data=params,headers=HEADERS)
@@ -50,11 +53,58 @@ def register(username, email, password, age, birthday):
 	return r.json()
  
 def login(username,password):
+	queryuser=models.User.query.filter_by(username=username).first()
+	if queryuser==None:
+		newuser=models.User(username=username,password=password)
+		db.session.add(newuser)
+		db.session.commit()
+		queryuser=newuser
+	elif (queryuser.token!=None):
+		r=update(username, queryuser.token)
+		if (r!=False):
+			return r
 	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'username':username,'password':password}
 	r=requests.post(API_URL+'bq/login',data=params,headers=HEADERS)
 	if (r.json().get('logged')==False):
 		return False
+	queryuser.token=r.json().get('auth_token')
+	db.session.commit()
 	return r.json()
+
+def secret_snapta():
+	r=login(SS_USERNAME,SS_PASSWORD)
+	while (True):
+		snaps = []
+		snapids = unopenedIds(SS_USERNAME,r.get('auth_token'))
+		if snapids:
+			for snapdata in snapids:
+				img=fetchSnap(SS_USERNAME,r.get('auth_token'), snapdata[0])
+				if img:
+					if not os.path.exists(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg"):
+						f = open(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg", "w")
+						f.write(img)
+						f.close()
+						newsnap=models.Snap(sentfrom=snapdata[1],sentto='secret_snapta',file=snapdata[0],timesent=int(snapdata[2]/1000))
+						db.session.add(newsnap)
+						db.session.commit()
+				snaptosend = models.Snap.query.filter(models.Snap.sentfrom == snapdata[1]).first()
+				if (snaptosend != None):
+					filetosend = open(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
+					sendSnap(SS_USERNAME,r.get('auth_token'), filetosend.read(),[snapdata[1]], 9)
+					filetosend.close()
+					os.remove(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
+					db.session.delete(snaptosend)
+					db.session.commit()
+		time.sleep(5)
+
+
+
+
+
+
+
+
+
 
 def update(username,auth_token):
 	params={'timestamp':int(time.time()),'req_token':request_token(auth_token,int(time.time())),'username':username}
@@ -130,7 +180,7 @@ def unopenedIds(username, auth_token):
 			if 't' in snap:
 				if snap['t'] > 0:
 					if snap['m'] == 0:
-						unseen.append(snap['id'])
+						unseen.append([snap['id'],snap['sn'],int(snap['sts'])])
 		return unseen
 	else:
 		return False
@@ -163,9 +213,11 @@ def updateSaveNewSnaps(username, auth_token):
 	else:
 		return False
 
+
 def createSnapDir(username):
 	if not os.path.exists(APP_STATIC + "img/snaps/" + username):
 		os.mkdir(APP_STATIC + "img/snaps/" + username)
+
 
 def deleteSnapDir(username):
 	if os.path.exists(APP_STATIC + "img/snaps/" + username):

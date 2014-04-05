@@ -39,6 +39,7 @@ def login():
             if r != False:
                 session['username'] = r['username']
                 session['auth_token'] = r['auth_token']
+                session['added_friends_timestamp'] = r['added_friends_timestamp']
 
                 secretSanta = False
                 for friend in r['friends']:
@@ -122,6 +123,7 @@ def logout():
     session.pop('auth_token', None)
     session.pop('snapta_changed', None)
     session.pop('snapta', None)
+    session.pop('added_friends_timestamp', None)
     flash('You were logged out')
     return redirect(url_for('login'))
 
@@ -130,9 +132,10 @@ def requests():
     if request.method == 'POST':
         if request.form['request'] == 'isSnaptaFriend':
             r = backend.update(request.form['username'], request.form['auth_token'])
+
             if r == False:
                 return redirect(url_for('logout'))
-
+            session['added_friends_timestamp'] = r['added_friends_timestamp']
             if session['snapta_changed'] == 'false':
                 if session['snapta'] == True:
                     return 'friends'
@@ -162,7 +165,7 @@ def requests():
             r = backend.update(request.form['username'], request.form['auth_token'])
             if r == False:
                 return redirect(url_for('logout'))
-
+            session['added_friends_timestamp'] = r['added_friends_timestamp']
             return jsonify(r)
 
 
