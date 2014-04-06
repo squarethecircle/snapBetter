@@ -9,9 +9,32 @@
 	<h3 class="sentfrom">{{fsnap["sentfrom"]}}</h3>
 	<p class="timesent"><em>{{fsnap["timesent"]}}</em></p>
 	<img src='{{fsnap["path"]}}'>
-	<button class='btn btn-warning seen'>Mark as Seen</button>
+	<button class='btn btn-warning seen' id='{{fsnap["snapid"]}}'>Mark as Seen</button>
 </div>
 
 {% endfor %}
+
+
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	$(".seen").click(function() {
+		var snap = $(this).parent();
+		$.ajax({
+			url: "/updateseen",
+			type: "POST",
+			data: {snapid: $(this).attr('id')},
+			success: function(response) {
+				if (response == 'success') {
+					snap.remove();
+				}
+			}
+		});
+	});
+
+});
+
+</script>
 
 {% endblock %}

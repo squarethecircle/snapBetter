@@ -55,7 +55,7 @@ def login():
                 session['snapta'] = secretSanta
                 session['snapta_changed'] = 'false'
 
-                return redirect(url_for('home'))
+                return redirect(url_for('snapfeed'))
             else:
                 error = 'Invalid username/password combination'
                 return render_template('login.html', error=error)
@@ -68,13 +68,13 @@ def login():
         return render_template('login.html')
 
 
-@app.route('/')
-def home():
-    error = None
-    if not 'auth_token' in session:
-        return redirect(url_for('login'))
-    else:
-        return render_template('home.html')
+# @app.route('/')
+# def home():
+#     error = None
+#     if not 'auth_token' in session:
+#         return redirect(url_for('login'))
+#     else:
+#         return render_template('home.html')
 
 @app.route('/secretsnapta')
 def secretsnapta():
@@ -104,7 +104,7 @@ def feeds():
         return render_template('feeds.html')
 
 #feed of all snaps
-@app.route('/snapfeed')
+@app.route('/')
 def snapfeed():
     if not 'auth_token' in session:
         error = 'Please log in'
@@ -120,9 +120,10 @@ def snapfeed():
                 print path
                 if isfile(path):
                     fsnapdic = {}
+                    fsnapdic['snapid'] = fsnap.file
                     fsnapdic['path'] = path
                     fsnapdic['sentfrom'] = fsnap.sentfrom
-                    fsnapdic['timesent'] = time.strftime('%m/%d, %H:%M', time.localtime(float(fsnap.timesent)))
+                    fsnapdic['timesent'] = time.strftime('%m/%d, %H:%M', time.localtime(int(fsnap.timesent)))
                     fsnaps.append(fsnapdic)
 
             print fsnaps
@@ -188,7 +189,13 @@ def requests():
 def snaptachanged():
     return session["snapta_changed"]
 
-
+@app.route('/updateseen', methods=['POST'])
+def updateseen():
+    r = backend.updateSeen(session['username'], session['auth_token'], session['added_friends_timestamp'], request.form['snapid'])
+    if r == True:
+        return 'success'
+    else:
+        return 'false'
 
 @app.route('/sendonewhisper', methods=['POST'])
 def sendOneWhisper():

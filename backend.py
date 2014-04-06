@@ -173,7 +173,7 @@ def unopenedIds(username, auth_token):
 			if 't' in snap:
 				if snap['t'] > 0:
 					if snap['m'] == 0:
-						unseen.append([snap['id'],snap['sn'],int(snap['sts'])])
+						unseen.append([snap['id'],snap['sn'],int(snap['sts']) / 1000])
 		return unseen
 	else:
 		return False
@@ -200,7 +200,7 @@ def updateSaveNewFSnaps(username, auth_token):
 
 #delete directory of fsnaps after logout
 def deleteFSnapDir(username):
-	fsnaps = models.FSnap.query.all()
+	fsnaps = models.FSnap.query.filter_by(sentto=username)
 	for fsnap in fsnaps:
 		if os.path.exists(APP_STATIC + "img/fsnaps/" + fsnap.file + ".jpg"):
 			os.remove(APP_STATIC + "img/fsnaps/" + fsnap.file + ".jpg")
@@ -231,6 +231,16 @@ def sendSnap(username, auth_token, data2, listoffriends, length):
 	params={'username':username,'timestamp':str(int(time.time())),'country_code':'US','req_token':request_token(auth_token,str(int(time.time()))),'media_id':media_id,'zipped':"0",'time':length,'recipient':recipientstring}
 	r=requests.post(API_URL+'bq/send',data=params,headers=HEADERS)
 	return r
+
+def updateSeen(username, auth_token, added_friends_timestamp, snapid):
+	json="{" + snapid + ":{ \"c\": 0, \"t\": " + str(int(time.time())) + ", \"replayed\": 0}}"
+	params={'username':username, 'timestamp':str(int(time.time())),'req_token':request_token(auth_token,int(time.time())), 'added_friends_timestamp': added_friends_timestamp, 'json': json, 'events': '[]'}
+	r=requests.post(API_URL+'/bq/update_snaps',data=params,headers=HEADERS)
+	if r.status_code == 200:
+		return True
+	else:
+		print r.content 
+		return False
 
 def captchaSolver(imagezip):
 	tempdir=tempfile.mkdtemp(dir=APP_STATIC)
