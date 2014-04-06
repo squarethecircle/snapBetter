@@ -6,25 +6,31 @@ from flask import flash
 from flask import redirect
 from flask import url_for
 from flask import jsonify
-import whisperfeed
-import sys
-import backend
-import logging
 from os import listdir
 from os.path import isfile, join
+import whisperfeed
+import sys
+import logging
+import time
 
+
+#sets correct encoding
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
-app = Flask(__name__)
-app.secret_key = 'secretkey'
-
+# logging config for debugging
 # Defaults to stdout
 logging.basicConfig(level=logging.INFO)
-
 # get the logger for the current Python module
 log = logging.getLogger(__name__)
+
+#startup
+app = Flask(__name__)
+app.secret_key = 'secretkey'
+app.config.from_object('config')
+
+import backend
+
 
 APP_STATIC = "static/"
 
@@ -48,10 +54,6 @@ def login():
                         break
                 session['snapta'] = secretSanta
                 session['snapta_changed'] = 'false'
-
-                #dir for snaps
-                backend.createSnapDir(session['username'])
-
 
                 return redirect(url_for('home'))
             else:
@@ -108,17 +110,30 @@ def snapfeed():
         error = 'Please log in'
         return render_template('login.html', error=error)
     else:
-        if backend.updateSaveNewSnaps(session['username'], session['auth_token']):
-            snappath = APP_STATIC + 'img/snaps/' + session['username']
-            files = [ join(snappath, f) for f in listdir(snappath) if isfile(join(snappath,f)) ]
-            return render_template('snapfeed.html', files=files)
+        r = backend.updateSaveNewFSnaps(session['username'], session['auth_token'])
+        if r:
+            fsnappath = APP_STATIC + 'img/fsnaps'
+            # files = [ join(snappath, f) for f in listdir(fsnappath) if isfile(join(snappath,f)) ]
+            fsnaps = []
+            for fsnap in r:
+                path = join(fsnappath, fsnap.file) + ".jpg"
+                print path
+                if isfile(path):
+                    fsnapdic = {}
+                    fsnapdic['path'] = path
+                    fsnapdic['sentfrom'] = fsnap.sentfrom
+                    fsnapdic['timesent'] = time.strftime('%m/%d, %H:%M', time.localtime(float(fsnap.timesent)))
+                    fsnaps.append(fsnapdic)
+
+            print fsnaps
+            return render_template('snapfeed.html', fsnaps=fsnaps)
         else:
             return redirect(url_for('logout'))
 
 @app.route('/logout')
 def logout():
     error = None
-    backend.deleteSnapDir(session['username'])
+    backend.deleteFSnapDir(session['username'])
     session.pop('username', None)
     session.pop('auth_token', None)
     session.pop('snapta_changed', None)

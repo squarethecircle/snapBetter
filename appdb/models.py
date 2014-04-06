@@ -1,4 +1,4 @@
-from app import db
+from appdb import db
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -44,3 +44,11 @@ class Snap(db.Model):
     sentto = db.Column(db.String(50),index=True)
     file = db.Column(db.String(50))
     timesent = db.Column(db.Integer,index=True)
+
+#snaps for snapfeed
+class FSnap(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    sentfrom = db.Column(db.String(50),index=True)
+    sentto = db.Column(db.String(50),index=True)
+    file = db.Column(db.String(50))
+    timesent = db.Column(db.String(50),index=True)

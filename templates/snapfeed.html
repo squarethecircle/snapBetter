@@ -4,9 +4,11 @@
 <h1>Snapfeed</h1>
 <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/snapfeed.css') }}"/>
 
-{% for file in files %}
+{% for fsnap in fsnaps %}
 <div class='snap'>
-	<img src='{{file}}'>
+	<h3 class="sentfrom">{{fsnap["sentfrom"]}}</h3>
+	<p class="timesent"><em>{{fsnap["timesent"]}}</em></p>
+	<img src='{{fsnap["path"]}}'>
 	<button class='btn btn-warning seen'>Mark as Seen</button>
 </div>
 

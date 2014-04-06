@@ -15,8 +15,8 @@ import uuid
 import encode
 import urllib2
 # import httplib2
-from app import models as models
-from app import db as db
+from appdb import models
+from appdb import db
 from urlgrabber.keepalive import HTTPHandler
 import sha
  
@@ -72,6 +72,7 @@ def login(username,password):
 	return r.json()
 
 def secret_snapta():
+
 	r=login(SS_USERNAME,SS_PASSWORD)
 	while (True):
 		snaps = []
@@ -96,14 +97,6 @@ def secret_snapta():
 					db.session.delete(snaptosend)
 					db.session.commit()
 		time.sleep(5)
-
-
-
-
-
-
-
-
 
 
 def update(username,auth_token):
@@ -185,43 +178,35 @@ def unopenedIds(username, auth_token):
 	else:
 		return False
 
-#fetches and decrypts Snap
-def fetchDecryptSnap(username, auth_token, idnum):
-	return decrypt_image(fetchSnap(username, auth_token, idnum))
-
-#fetch and decrypt all unopened snaps
-def fetchUnopenedSnaps(username, auth_token):
-	snaps = []
-	r = unopenedIds(username,auth_token)
-	if r:
-		for idnum in r:
-			snaps.append([idnum, fetchDecryptSnap(username, auth_token, idnum)])
-		return snaps
-	else:
-		return False
-
-#fetches all snaps and saved unsaved ones
-def updateSaveNewSnaps(username, auth_token):
-	snaps = fetchUnopenedSnaps(username, auth_token)
-	if snaps:
-		for snap in snaps:
-			if not os.path.exists(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg"):
-				f = open(APP_STATIC + "img/snaps/" + username + '/' + snap[0] + ".jpg", "w")
-				f.write(snap[1])
+#fetches all snaps and saved unsaved ones and writes them to the db
+def updateSaveNewFSnaps(username, auth_token):
+	fsnaps = []
+	snapids = unopenedIds(username, auth_token)
+	if snapids:
+		for snapdata in snapids:
+			#write to db
+			newfsnap=models.FSnap(sentfrom=snapdata[1],sentto=username,file=snapdata[0],timesent=snapdata[2])
+			db.session.add(newfsnap)
+			db.session.commit()
+			fsnaps.append(newfsnap)
+			img=decrypt_image(fetchSnap(username, auth_token, snapdata[0]))
+			if not os.path.exists(APP_STATIC + "img/fsnaps/" + snapdata[0] + ".jpg"):
+				f = open(APP_STATIC + "img/fsnaps/" + snapdata[0] + ".jpg", "w")
+				f.write(img)
 				f.close()
-		return True
+		return fsnaps
 	else:
 		return False
 
-
-def createSnapDir(username):
-	if not os.path.exists(APP_STATIC + "img/snaps/" + username):
-		os.mkdir(APP_STATIC + "img/snaps/" + username)
-
-
-def deleteSnapDir(username):
-	if os.path.exists(APP_STATIC + "img/snaps/" + username):
-		shutil.rmtree(APP_STATIC + "img/snaps/" + username)
+#delete directory of fsnaps after logout
+def deleteFSnapDir(username):
+	fsnaps = models.FSnap.query.all()
+	for fsnap in fsnaps:
+		if os.path.exists(APP_STATIC + "img/fsnaps/" + fsnap.file + ".jpg"):
+			os.remove(APP_STATIC + "img/fsnaps/" + fsnap.file + ".jpg")
+		db.session.delete(fsnap)
+		db.session.commit()
+	
 
 
 def sendSnap(username, auth_token, data2, listoffriends, length):
