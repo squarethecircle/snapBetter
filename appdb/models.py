@@ -38,6 +38,7 @@ class SecretSanta(db.Model):
     def __repr__(self):
         return '<Image %r sent by %r>' % (self.imagesent, self.username)
 
+#snapqueue
 class Snap(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     sentfrom = db.Column(db.String(50),index=True)

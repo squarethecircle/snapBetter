@@ -52,6 +52,7 @@ def login():
                     if friend['name'] == 'secret_snapta':
                         secretSanta = True
                         break
+
                 session['snapta'] = secretSanta
                 session['snapta_changed'] = 'false'
 
@@ -111,7 +112,7 @@ def snapfeed():
         return render_template('login.html', error=error)
     else:
         r = backend.updateSaveNewFSnaps(session['username'], session['auth_token'])
-        if r:
+        if r != False:
             fsnappath = APP_STATIC + 'img/fsnaps'
             # files = [ join(snappath, f) for f in listdir(fsnappath) if isfile(join(snappath,f)) ]
             fsnaps = []

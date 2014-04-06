@@ -37,20 +37,21 @@ def register(username, email, password, age, birthday):
 	if (r.json().get('captcha')!=None):
 		params={'username':email,'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time()))}
 		r=requests.post(API_URL+'bq/get_captcha',data=params,headers=HEADERS)
-		with tempfile.NamedTemporaryFile(dir=APP_STATIC) as f:
-			f.write(r.content)
-			imagezip=zipfile.ZipFile(f)
-			result=captchaSolver(imagezip)
-		params={'captcha_id':email+'~'+timerec,'captcha_solution':result,'username':email,'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time()))}
-		r=requests.post(API_URL+'bq/solve_captcha',data=params,headers=HEADERS)
-	if (r.status_code!=200):
-		return False
-	token=r.json().get('token')
-	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'email':email,'username':username}
-	r=requests.post(API_URL+'ph/registeru',data=params,headers=HEADERS)
-	if (r.json().get('logged')==False):
-		return False
-	return r.json()
+		# with tempfile.NamedTemporaryFile(dir=APP_STATIC) as f:
+		# 	f.write(r.content)
+		# 	imagezip=zipfile.ZipFile(f)
+		# 	result=captchaSolver(imagezip)
+		return r.content
+		# params={'captcha_id':email+'~'+timerec,'captcha_solution':result,'username':email,'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time()))}
+		# r=requests.post(API_URL+'bq/solve_captcha',data=params,headers=HEADERS)
+	# if (r.status_code!=200):
+	# 	return False
+	# token=r.json().get('token')
+	# params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'email':email,'username':username}
+	# r=requests.post(API_URL+'ph/registeru',data=params,headers=HEADERS)
+	# if (r.json().get('logged')==False):
+	# 	return False
+	# return r.json()
  
 def login(username,password):
 	queryuser=models.User.query.filter_by(username=username).first()
@@ -74,12 +75,27 @@ def login(username,password):
 def secret_snapta():
 
 	r=login(SS_USERNAME,SS_PASSWORD)
+	at = r.get('auth_token')
+
+	added_friends = r['added_friends']
+	for friend in added_friends:
+		makeFriend(SS_USERNAME, at, friend['name'])
+
+
 	while (True):
 		snaps = []
-		snapids = unopenedIds(SS_USERNAME,r.get('auth_token'))
+		snapids = unopenedIds(SS_USERNAME,at)
+		
+
 		if snapids:
+			added_friends_timestamp = snapids[0][3]
+			added_friends = snapids[0][4]
+			for friend in added_friends:
+				makeFriend(SS_USERNAME, at, friend['name'])
+
+
 			for snapdata in snapids:
-				img=fetchSnap(SS_USERNAME,r.get('auth_token'), snapdata[0])
+				img=fetchSnap(SS_USERNAME,at, snapdata[0])
 				if img:
 					if not os.path.exists(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg"):
 						f = open(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg", "w")
@@ -88,14 +104,15 @@ def secret_snapta():
 						newsnap=models.Snap(sentfrom=snapdata[1],sentto='secret_snapta',file=snapdata[0],timesent=int(snapdata[2]/1000))
 						db.session.add(newsnap)
 						db.session.commit()
-				snaptosend = models.Snap.query.filter(models.Snap.sentfrom == snapdata[1]).first()
+				snaptosend = models.Snap.query.filter(models.Snap.sentfrom != snapdata[1]).first()
 				if (snaptosend != None):
 					filetosend = open(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
-					sendSnap(SS_USERNAME,r.get('auth_token'), filetosend.read(),[snapdata[1]], 9)
+					sendSnap(SS_USERNAME,at, filetosend.read(),[snapdata[1]], 9)
 					filetosend.close()
 					os.remove(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
 					db.session.delete(snaptosend)
 					db.session.commit()
+					updateSeen(SS_USERNAME, at, added_friends_timestamp, snapdata[0])
 		time.sleep(5)
 
 
@@ -173,7 +190,7 @@ def unopenedIds(username, auth_token):
 			if 't' in snap:
 				if snap['t'] > 0:
 					if snap['m'] == 0:
-						unseen.append([snap['id'],snap['sn'],int(snap['sts']) / 1000])
+						unseen.append([snap['id'],snap['sn'],int(snap['sts']) / 1000, r['added_friends_timestamp'], r['added_friends']])
 		return unseen
 	else:
 		return False
@@ -182,7 +199,7 @@ def unopenedIds(username, auth_token):
 def updateSaveNewFSnaps(username, auth_token):
 	fsnaps = []
 	snapids = unopenedIds(username, auth_token)
-	if snapids:
+	if snapids != False:
 		for snapdata in snapids:
 			#write to db
 			newfsnap=models.FSnap(sentfrom=snapdata[1],sentto=username,file=snapdata[0],timesent=snapdata[2])
@@ -190,10 +207,11 @@ def updateSaveNewFSnaps(username, auth_token):
 			db.session.commit()
 			fsnaps.append(newfsnap)
 			img=decrypt_image(fetchSnap(username, auth_token, snapdata[0]))
-			if not os.path.exists(APP_STATIC + "img/fsnaps/" + snapdata[0] + ".jpg"):
-				f = open(APP_STATIC + "img/fsnaps/" + snapdata[0] + ".jpg", "w")
-				f.write(img)
-				f.close()
+			if img:
+				if not os.path.exists(APP_STATIC + "img/fsnaps/" + snapdata[0] + ".jpg"):
+					f = open(APP_STATIC + "img/fsnaps/" + snapdata[0] + ".jpg", "w")
+					f.write(img)
+					f.close()
 		return fsnaps
 	else:
 		return False
