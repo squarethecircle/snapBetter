@@ -8,7 +8,6 @@ from flask import url_for
 from flask import jsonify
 from os import listdir
 from os.path import isfile, join
-import whisperfeed
 import sys
 import logging
 import time
@@ -33,6 +32,8 @@ import backend
 
 
 APP_STATIC = "static/"
+WF_USERNAME='whisper_feed'
+WF_PASSWORD='3stacksqSort'
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -118,7 +119,6 @@ def snapfeed():
             fsnaps = []
             for fsnap in r:
                 path = join(fsnappath, fsnap.file) + ".jpg"
-                print path
                 if isfile(path):
                     fsnapdic = {}
                     fsnapdic['snapid'] = fsnap.file
@@ -127,7 +127,6 @@ def snapfeed():
                     fsnapdic['timesent'] = time.strftime('%m/%d, %H:%M', time.localtime(int(fsnap.timesent)))
                     fsnaps.append(fsnapdic)
 
-            print fsnaps
             return render_template('snapfeed.html', fsnaps=fsnaps)
         else:
             return redirect(url_for('logout'))
@@ -163,6 +162,10 @@ def requests():
                     return 'nofriends'
                 else:
                     return 'friends'
+        elif request.form['request'] =='isWhisperSubscribed':
+            r = backend.update(request.form['username'], request.form['auth_token'])
+            if r == False:
+                return redirect(url_for('logout'))
 
         elif request.form['request'] == 'makeFriend':   
             r = backend.makeFriend(request.form['username'], request.form['auth_token'], request.form['friend'])
@@ -198,8 +201,8 @@ def updateseen():
     else:
         return 'false'
 
-@app.route('/sendonewhisper', methods=['POST'])
-def sendOneWhisper():
+@app.route('/subscribewhisper', methods=['POST'])
+def subscribeWhisper():
     backend.makeFriend(request.form['username'], request.form['auth_token'], 'whisper_feed')
     origAT = request.form['auth_token']
     origUN = request.form['username']
@@ -207,9 +210,10 @@ def sendOneWhisper():
     at = r['auth_token']
     backend.makeFriend('whisper_feed', at, origUN)
 
-    feed = whisperfeed.main()
-    data = backend.encrypt_image(feed)
-    r = backend.sendSnap('whisper_feed', at, data, [origUN], 10)
+    f = open(APP_STATIC + 'img/whisper-welcome.png')
+    r = backend.sendSnap(WF_USERNAME, at, encrypt_image(f.read()), friendlist, 10)
+    f.close()
+
     session['auth_token'] = origAT
     session['username'] = origUN
     if r == 200:

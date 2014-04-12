@@ -2,6 +2,7 @@
 {% block body %}
 
 <link id="mainStyles" rel="stylesheet" href="{{ url_for('static', filename='stylesheets/feeds.css') }}"/>
+<script type="text/javascript" src="{{ url_for('static', filename='javascript/feeds.js') }}"></script>
 
 
 <h1>Manage Feeds</h1>
@@ -9,7 +10,7 @@
 <div class='feed'>
 	<div class='feed-head'>
 		<h3>Whisper</h3>
-		<button class='btn toggleFeed unsubscribed'>Subscribe</button>
+		<button id='whisperButton' class='btn toggleFeed unsubscribed'>Subscribe</button>
 	</div>
 	<img src="{{ url_for('static', filename='img/whisper-logo.png') }}" alt="...">
 
@@ -17,7 +18,7 @@
 
 </div>
 
-<div class='feed'>
+<!-- <div class='feed'>
 	<div class='feed-head'>
 		<h3>Pinterest</h3>
 		<button class='btn toggleFeed unsubscribed'>Subscribe</button>
@@ -26,23 +27,15 @@
 
 	<p>See content from the world's largest pinboard. </p>
 
-</div>
+</div> -->
 
 <script type='text/javascript'>
 
-function sendOneWhisper() {
-	$.ajax({
-		url: '/sendonewhisper',
-		type: 'POST',
-		data: { 'username': "{{session['username']}}", 'auth_token':"{{session['auth_token']}}"},
-		success: function (response) {
-			if (response == 'success')
-				console.log('whisper sent');
-		}
-	});
-}
 
 
+$(document).ready(function(){
+	whisperSubscribed("{{session['username']}}", "{{session['auth_token']}}");
+});
 
 </script
 

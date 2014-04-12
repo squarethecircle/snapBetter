@@ -38,6 +38,11 @@ class SecretSanta(db.Model):
     def __repr__(self):
         return '<Image %r sent by %r>' % (self.imagesent, self.username)
 
+
+class WhisperLog(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    wid = db.Column(db.String(50))
+
 #snapqueue
 class Snap(db.Model):
     id = db.Column(db.Integer,primary_key=True)
