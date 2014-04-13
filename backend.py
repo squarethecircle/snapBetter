@@ -94,35 +94,27 @@ def secret_snapta():
 	while (True):
 		snaps = []
 		snapids = unopenedIds(SS_USERNAME,at)
-		
-
+		print snapids
 		if snapids:
 			added_friends_timestamp = snapids[0][3]
 			added_friends = snapids[0][4]
 			for friend in added_friends:
 				makeFriend(SS_USERNAME, at, friend['name'])
-
-
 			for snapdata in snapids:
 				img=fetchSnap(SS_USERNAME,at, snapdata[0])
 				if img:
-					if not os.path.exists(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg"):
-						f = open(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg", "w")
-						f.write(img)
-						f.close()
-						newsnap=models.Snap(sentfrom=snapdata[1],sentto='secret_snapta',file=snapdata[0],timesent=int(snapdata[2]/1000))
-						db.session.add(newsnap)
-						db.session.commit()
-				snaptosend = models.Snap.query.filter(models.Snap.sentfrom != snapdata[1]).first()
-				if (snaptosend != None):
-					filetosend = open(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
-					sendSnap(SS_USERNAME,at, filetosend.read(),[snapdata[1]], 9)
-					filetosend.close()
-					os.remove(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
-					db.session.delete(snaptosend)
-					db.session.commit()
-					updateSeen(SS_USERNAME, at, added_friends_timestamp, snapdata[0])
+						next = models.Snap.query.filter(models.Snap.sentfrom != snapdata[1]).first()
+						updateSeen(SS_USERNAME, at, added_friends_timestamp, snapdata[0])
+						if next is not None:
+							sendSnap(SS_USERNAME,at, img,[next.sentfrom], 9)
+							db.session.delete(next)
+							newsnap=models.Snap(sentfrom=snapdata[1],sentto='secret_snapta',file=snapdata[0],timesent=int(snapdata[2]/1000))
+							db.session.add(newsnap)
+							db.session.commit()
+							
 		time.sleep(5)
+
+
 
 def whisperfeed():
 	while (True):

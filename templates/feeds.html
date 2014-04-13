@@ -92,7 +92,7 @@ var toggleFeed = function() {
 			$(this).replaceWith(unsubscribe);
 			$(this).css('color', '#FFF');
 			$.ajax({
-				url: '/requests',
+				url: $SCRIPT_ROOT+'requests',
 				type: 'POST',
 				data: { 'username': "{{session['username']}}", 'auth_token':"{{session['auth_token']}}", 'request': 'deleteFriend', 'friend': 'whisper_feed'},
 				success: function (response) {
