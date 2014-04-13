@@ -163,7 +163,7 @@ def whisperfeed():
 		else:
 			limit+=100
 
-
+		sleep(43200)
 
 
 
