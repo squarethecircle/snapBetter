@@ -30,14 +30,6 @@ class Group(db.Model):
     def __repr__(self):
         return '<Group %d, owned by %r>' % (self.group_id, self.owner.username)
 
-class SecretSanta(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
-    username = db.Column(db.String(50))
-    imagesent = db.Column(db.String(50))
-
-    def __repr__(self):
-        return '<Image %r sent by %r>' % (self.imagesent, self.username)
-
 
 class WhisperLog(db.Model):
     id = db.Column(db.Integer,primary_key=True)

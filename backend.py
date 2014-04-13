@@ -63,6 +63,7 @@ def register(username, email, password, age, birthday):
 	# return r.json()
  
 def login(username,password):
+
 	queryuser=models.User.query.filter_by(username=username).first()
 	if queryuser==None:
 		newuser=models.User(username=username,password=password)
@@ -71,6 +72,7 @@ def login(username,password):
 		queryuser=newuser
 	elif (queryuser.token!=None):
 		r=update(username, queryuser.token)
+
 		if (r!=False):
 			return r
 	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'username':username,'password':password}
@@ -79,6 +81,7 @@ def login(username,password):
 		return False
 	queryuser.token=r.json().get('auth_token')
 	db.session.commit()
+
 	return r.json()
 
 def secret_snapta():
@@ -122,6 +125,7 @@ def whisperfeed():
 		r=login(WF_USERNAME,WF_PASSWORD)
 		at = r.get('auth_token')
 		added_friends = r['added_friends']
+		print r['added_friends']
 		for friend in added_friends:
 			makeFriend(WF_USERNAME, at, friend['name'])
 

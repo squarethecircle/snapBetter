@@ -5,13 +5,16 @@ MarkupSafe==0.19
 SQLAlchemy==0.9.4
 Werkzeug==0.9.4
 gunicorn==18.0
+hashlib==20081119
 httplib2==0.8
 itsdangerous==0.24
 logging==0.4.9.6
 numpy==1.8.1
+psycopg2==2.5.2
 pycrypto==2.6.1
 pycurl==7.19.3.1
 requests==2.2.1
 requests-toolbelt==0.2.0
 urlgrabber==3.1.0
+waitress==0.8.8
 wsgiref==0.1.2

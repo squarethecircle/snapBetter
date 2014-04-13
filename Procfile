@@ -1,1 +1,2 @@
-web: gunicorn snapbetter:app
+web: ss secret_snapta.py
+web: wf whisperfeed.py
