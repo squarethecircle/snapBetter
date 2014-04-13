@@ -2,8 +2,8 @@
 {% block body %}
 
 <link id="mainStyles" rel="stylesheet" href="{{ url_for('static', filename='stylesheets/feeds.css') }}"/>
-<script type="text/javascript" src="{{ url_for('static', filename='javascript/feeds.js') }}"></script>
-
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='javascript/feeds.js') }}"></script>
+-->
 
 <h1>Manage Feeds</h1>
 <p>Subscribe to periodic snaps from one (or more) of these awesome feeds!</p>
@@ -33,10 +33,122 @@
 
 
 
-$(document).ready(function(){
-	whisperSubscribed("{{session['username']}}", "{{session['auth_token']}}");
-});
+	$(document).ready(function(){
+		whisperSubscribed("{{session['username']}}", "{{session['auth_token']}}");
+		toggleFeed();
+	});
 
-</script
+
+
+	var whisperSubscribed = function(username, auth_token) {
+		$.ajax({
+
+			url: $SCRIPT_ROOT+'requests',
+			type: 'POST',
+			data: { username: username, auth_token: auth_token, request: 'isWhisperSubscribed' },
+			success: function(response) {
+				if (response == 'yes') {
+					var subscribe = '<button type="button" id="whisperButton" class="btn toggleFeed subscribed">Subscribed</button>';
+					$("#whisperButton").replaceWith(subscribe);
+					$("#whisperButton").css('color', '#FFF');
+					toggleFeed();
+				} else {
+					var unsubscribe = '<button id="whisperButton" type="button" class="btn toggleFeed unsubscribed">Subscribe</button>';
+					$("#whisperButton").replaceWith(unsubscribe);
+					toggleFeed();
+
+				}
+				$("#mainStyles").html($("#mainStyles").html());
+
+			}
+
+		});
+
+		$.ajax({
+
+			url: $SCRIPT_ROOT+'requests',
+			type: 'POST',
+			data: { username: username, auth_token: auth_token, request: 'isWhisperChanged' },
+			success: function(response) {
+				if (response == 'yes') 
+					disableButton();
+			}
+
+		});
+	};
+
+//toggle for feed subscribe
+var toggleFeed = function() {
+	$(".toggleFeed").click(function() {
+		if ($(this).hasClass('unsubscribed')) {
+			var subscribe = '<button type="button" id="whisperButton" class="btn toggleFeed subscribed">Subscribed</button>';
+			$(this).replaceWith(subscribe);
+			$(this).css('color', '#FFF');
+			subscribeWhisper();
+			toggleFeed();
+			disableButton();
+		} else {
+			var unsubscribe = '<button id="whisperButton" type="button" class="btn toggleFeed unsubscribed">Subscribe</button>';
+			$(this).replaceWith(unsubscribe);
+			$(this).css('color', '#FFF');
+			$.ajax({
+				url: '/requests',
+				type: 'POST',
+				data: { 'username': "{{session['username']}}", 'auth_token':"{{session['auth_token']}}", 'request': 'deleteFriend', 'friend': 'whisper_feed'},
+				success: function (response) {
+					if (response == 'success')
+						console.log('whisper unsubscribed');
+				}
+			});
+			toggleFeed();
+			disableButton();
+
+		}
+	});
+	$(function(){
+		$(".subscribed").hover(function(){
+			$(this).html("Unsubscribe");
+			$(this).css("background-color", "#D91E18");
+			$(this).css("color", "#FFF");
+		}, function(){
+			$(this).css("background-color", "#F25887");
+			$(this).html('Subscribed');
+		})
+	});
+};
+
+function subscribeWhisper() {
+	$.ajax({
+		url: '/subscribewhisper',
+		type: 'POST',
+		data: { 'username': "{{session['username']}}", 'auth_token':"{{session['auth_token']}}"},
+		success: function (response) {
+			if (response == 'success')
+				console.log('whisper sent');
+		}
+	});
+}
+
+function disableButton() {
+	
+	if ($("#whisperButton").hasClass("unsubscribe")) 
+		var msg = "Log in again to subscribe."
+	else
+		var msg = "Log in again to unsubscribe."
+	$("#whisperButton").attr('disabled', 'disabled').popover({
+		content: msg,
+		placement: 'right'
+	});
+	$("#whisperButton").popover("show");
+	$(document).click(function() {
+		$("#whisperButton").popover("hide");
+	});
+	
+
+}
+
+
+
+</script>
 
 {% endblock %}

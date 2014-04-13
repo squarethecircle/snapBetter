@@ -160,14 +160,12 @@ def whisperfeed():
 				if img.status_code == 200:
 					r = sendSnap(WF_USERNAME, at, encrypt_image(img.content), friendlist, 10)
 					if r.status_code == 200:
-						print "scusde"
 						newWhisper = models.WhisperLog(wid=whisper["wid"])
 						db.session.add(newWhisper)
 						db.session.commit()
 						break
 		else:
 			limit+=100
-		time.sleep(86400/2)
 
 
 

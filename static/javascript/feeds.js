@@ -40,6 +40,17 @@ var toggleFeed = function() {
 			toggleFeed();
 		} else {
 			var unsubscribe = '<button id="whisperButton" type="button" class="btn toggleFeed unsubscribed">Subscribe</button>';
+			$(this).replaceWith(unsubscribe);
+			$(this).css('color', '#FFF');
+			$.ajax({
+				url: '/requests',
+				type: 'POST',
+				data: { 'username': "{{session['username']}}", 'auth_token':"{{session['auth_token']}}", 'request': 'makeFriend', 'friend': 'whisper_feed'},
+				success: function (response) {
+					if (response == 'success')
+						console.log('whisper unsubscribed');
+				}
+			});
 			toggleFeed();
 		}
 	});

@@ -33,7 +33,7 @@ import backend
 
 APP_STATIC = "static/"
 WF_USERNAME='whisper_feed'
-WF_PASSWORD='3stacksqSort'
+WF_PASSWORD='Banvanphan2105!'
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -49,11 +49,15 @@ def login():
                 session['added_friends_timestamp'] = r['added_friends_timestamp']
 
                 secretSanta = False
+                whisperFeed = False
                 for friend in r['friends']:
                     if friend['name'] == 'secret_snapta':
                         secretSanta = True
-                        break
+                    if friend['name'] == 'whisper_feed':
+                        whisperFeed = True
 
+                session['whisperfeed'] = whisperFeed
+                session['wf_changed'] = 'false'
                 session['snapta'] = secretSanta
                 session['snapta_changed'] = 'false'
 
@@ -139,6 +143,8 @@ def logout():
     session.pop('auth_token', None)
     session.pop('snapta_changed', None)
     session.pop('snapta', None)
+    session.pop('whisperfeed', None)
+    session.pop('wf_changed', None)
     session.pop('added_friends_timestamp', None)
     flash('You were logged out')
     return redirect(url_for('login'))
@@ -166,18 +172,41 @@ def requests():
             r = backend.update(request.form['username'], request.form['auth_token'])
             if r == False:
                 return redirect(url_for('logout'))
+            if session['wf_changed'] == 'false':
+                if session['whisperfeed'] == True:
+                    return 'yes'
+                else:
+                    return 'no'
+            else:
+                if session['whisperfeed'] == True:
+                    return 'no'
+                else:
+                    return 'yes'
+        elif request.form['request'] == 'isWhisperChanged':
+            if session["wf_changed"] == 'true':
+                return "yes"
+            else:
+                return "no"
+
 
         elif request.form['request'] == 'makeFriend':   
             r = backend.makeFriend(request.form['username'], request.form['auth_token'], request.form['friend'])
             if r == 200:
-                session['snapta_changed'] = 'true'
+                if request.form['friend'] == 'secret_snapta':
+                    session['snapta_changed'] = 'true'
+                elif request.form['friend'] == 'whisper_feed':
+                    session['wf_changed'] = 'true'
+
                 return 'true'
             else:
                 return 'false'
         elif request.form['request'] == 'deleteFriend':
             r = backend.deleteFriend(request.form['username'], request.form['auth_token'], request.form['friend'])
             if r == 200:
-                session['snapta_changed'] = 'true'
+                if request.form['friend'] == 'secret_snapta':
+                    session['snapta_changed'] = 'true'
+                elif request.form['friend'] == 'whisper_feed':
+                    session['wf_changed'] = 'true'
                 return 'true'
             else:
                 return 'false'
@@ -203,6 +232,8 @@ def updateseen():
 
 @app.route('/subscribewhisper', methods=['POST'])
 def subscribeWhisper():
+    session['whisperfeed'] = True
+    session['wf_changed'] = 'true'
     backend.makeFriend(request.form['username'], request.form['auth_token'], 'whisper_feed')
     origAT = request.form['auth_token']
     origUN = request.form['username']
@@ -211,7 +242,7 @@ def subscribeWhisper():
     backend.makeFriend('whisper_feed', at, origUN)
 
     f = open(APP_STATIC + 'img/whisper-welcome.png')
-    r = backend.sendSnap(WF_USERNAME, at, encrypt_image(f.read()), friendlist, 10)
+    r = backend.sendSnap(WF_USERNAME, at, backend.encrypt_image(f.read()), request.form['username'], 10)
     f.close()
 
     session['auth_token'] = origAT
