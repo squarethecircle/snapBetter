@@ -1,2 +1,2 @@
-web: ss secret_snapta.py
-web: wf whisperfeed.py
+web: python secret_snapta.py
+web: python whisperfeed.py
