@@ -1,1 +1,1 @@
-web: python secret_snapta.py
+wf: python whisperfeed.py

@@ -77,8 +77,10 @@ def login(username,password):
 			return r
 	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'username':username,'password':password}
 	r=requests.post(API_URL+'bq/login',data=params,headers=HEADERS)
+	print r
 	if (r.json().get('logged')==False):
 		return False
+
 	queryuser.token=r.json().get('auth_token')
 	db.session.commit()
 
