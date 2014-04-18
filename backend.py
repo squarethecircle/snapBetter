@@ -27,23 +27,32 @@ STATIC_TOKEN='m198sOkJEn37DjqZ32lpRu76xmw288xSQ9'
 HEADERS={'User-agent': 'Snapchat/6.1.2 (iPhone5,1; iOS 7.1; gzip)'}
 SS_USERNAME='secret_snapta'
 SS_PASSWORD='3stacksqSort'
+WF_USERNAME='whisper_feed'
+WF_PASSWORD='Banvanphan2105!'
 
 def register(username, email, password, age, birthday):
-	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'email':email,'password':password,'age':int(age),'birthday':birthday}
+	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'email':email,'password':password,'age':int(age),'birthday':birthday, 'time_zone': 'America/New_York'}
 	r=requests.post(API_URL+'bq/register',data=params,headers=HEADERS)
 	timerec=int(time.time())
-	if (r.json().get('logged')==False):
-			return False
-	if (r.json().get('captcha')!=None):
-		params={'username':email,'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time()))}
-		r=requests.post(API_URL+'bq/get_captcha',data=params,headers=HEADERS)
-		# with tempfile.NamedTemporaryFile(dir=APP_STATIC) as f:
-		# 	f.write(r.content)
-		# 	imagezip=zipfile.ZipFile(f)
-		# 	result=captchaSolver(imagezip)
-		return r.content
-		# params={'captcha_id':email+'~'+timerec,'captcha_solution':result,'username':email,'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time()))}
-		# r=requests.post(API_URL+'bq/solve_captcha',data=params,headers=HEADERS)
+	if r:
+		if (r.json().get('logged')==False):
+				return False
+		if (r.json().get('captcha')!=None):
+			params={'req_token':request_token(r.json().get('auth_token'),int(time.time())), 'username':email,'timestamp':int(time.time())}
+			r=requests.post(API_URL+'bq/get_captcha',data=params,headers=HEADERS)
+
+		with tempfile.NamedTemporaryFile(dir=APP_STATIC) as f:
+			f.write(r.content)
+			imagezip=zipfile.ZipFile(f)
+			# imagezip.extractall(APP_STATIC + "img/captcha", ["asdf","ptter", "asdf", "fewt", "4534", "dsfasd", "dsfe", "fdfwe"])
+			for image in imagezip.namelist():
+				m = hashlib.md5(imagezip.read(image))
+				f = open(APP_STATIC + "img/captcha/" + m.hexdigest() + ".png", "w")
+				f.write(imagezip.read(image))
+				f.close()
+	# 		result=captchaSolver(imagezip)
+	# 	params={'captcha_id':email+'~'+timerec,'captcha_solution':result,'username':email,'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time()))}
+	# 	r=requests.post(API_URL+'bq/solve_captcha',data=params,headers=HEADERS)
 	# if (r.status_code!=200):
 	# 	return False
 	# token=r.json().get('token')
@@ -85,35 +94,73 @@ def secret_snapta():
 	while (True):
 		snaps = []
 		snapids = unopenedIds(SS_USERNAME,at)
-		
-
+		print snapids
 		if snapids:
 			added_friends_timestamp = snapids[0][3]
 			added_friends = snapids[0][4]
 			for friend in added_friends:
 				makeFriend(SS_USERNAME, at, friend['name'])
-
-
 			for snapdata in snapids:
 				img=fetchSnap(SS_USERNAME,at, snapdata[0])
 				if img:
-					if not os.path.exists(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg"):
-						f = open(APP_STATIC + "img/snaps/" + snapdata[0] + ".jpg", "w")
-						f.write(img)
-						f.close()
-						newsnap=models.Snap(sentfrom=snapdata[1],sentto='secret_snapta',file=snapdata[0],timesent=int(snapdata[2]/1000))
-						db.session.add(newsnap)
-						db.session.commit()
-				snaptosend = models.Snap.query.filter(models.Snap.sentfrom != snapdata[1]).first()
-				if (snaptosend != None):
-					filetosend = open(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
-					sendSnap(SS_USERNAME,at, filetosend.read(),[snapdata[1]], 9)
-					filetosend.close()
-					os.remove(APP_STATIC + "img/snaps/" + snaptosend.file + ".jpg")
-					db.session.delete(snaptosend)
-					db.session.commit()
-					updateSeen(SS_USERNAME, at, added_friends_timestamp, snapdata[0])
+						next = models.Snap.query.filter(models.Snap.sentfrom != snapdata[1]).first()
+						updateSeen(SS_USERNAME, at, added_friends_timestamp, snapdata[0])
+						if next is not None:
+							sendSnap(SS_USERNAME,at, img,[next.sentfrom], 9)
+							db.session.delete(next)
+							newsnap=models.Snap(sentfrom=snapdata[1],sentto='secret_snapta',file=snapdata[0],timesent=int(snapdata[2]/1000))
+							db.session.add(newsnap)
+							db.session.commit()
+							
 		time.sleep(5)
+
+
+
+def whisperfeed():
+	while (True):
+		#add new friends
+		r=login(WF_USERNAME,WF_PASSWORD)
+		at = r.get('auth_token')
+		added_friends = r['added_friends']
+		for friend in added_friends:
+			makeFriend(WF_USERNAME, at, friend['name'])
+
+		# f = open(APP_STATIC + 'img/whisper-welcome.png')
+		# sendSnap(WF_USERNAME, at, encrypt_image(f.read()), friendlist, 10)
+		# f.close()
+
+
+		#generate friendlist
+		r=update(WF_USERNAME, at)
+		at = r.get('auth_token')
+		friendlist = []
+		for friend in r["friends"]:
+			friendlist.append(friend["name"])
+		sentids = models.WhisperLog.query.all()
+
+		limit = 100
+		popular = 'http://prod.whisper.sh/whispers/popular?limit='+str(limit);
+		r = requests.get(popular)
+		json = r.json()['popular']
+		for idx,whisper in enumerate(json):
+			if idx < limit - 100:
+				continue
+			# print whisper['wid']
+			sent = models.WhisperLog.query.filter_by(wid=whisper["wid"]).first()
+			if sent is None:
+				img = requests.get(whisper['url'] + '?puid=' + whisper['wid'])
+				if img.status_code == 200:
+					r = sendSnap(WF_USERNAME, at, encrypt_image(img.content), friendlist, 10)
+					if r.status_code == 200:
+						newWhisper = models.WhisperLog(wid=whisper["wid"])
+						db.session.add(newWhisper)
+						db.session.commit()
+						break
+		else:
+			limit+=100
+
+
+
 
 
 def update(username,auth_token):
