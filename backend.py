@@ -54,22 +54,22 @@ def register(username, email, password, age, birthday):
 	# return r.json()
  
 def login(username,password):
-	queryuser=models.User.query.filter_by(username=username).first()
-	if queryuser==None:
-		newuser=models.User(username=username,password=password)
-		db.session.add(newuser)
-		db.session.commit()
-		queryuser=newuser
-	elif (queryuser.token!=None):
-		r=update(username, queryuser.token)
-		if (r!=False):
-			return r
+	#queryuser=models.User.query.filter_by(username=username).first()
+	#f queryuser==None:
+	#	newuser=models.User(username=username,password=password)
+	#	db.session.add(newuser)
+	#	db.session.commit()
+	#	queryuser=newuser
+	#elif (queryuser.token!=None):
+	#	r=update(username, queryuser.token)
+	#	if (r!=False):
+	#		return r
 	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'username':username,'password':password}
 	r=requests.post(API_URL+'bq/login',data=params,headers=HEADERS)
 	if (r.json().get('logged')==False):
 		return False
-	queryuser.token=r.json().get('auth_token')
-	db.session.commit()
+	#queryuser.token=r.json().get('auth_token')
+	#db.session.commit()
 	return r.json()
 
 def secret_snapta():
