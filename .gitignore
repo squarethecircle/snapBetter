@@ -2,3 +2,4 @@ flask
 *.pyc
 venv
 .elasticbeanstalk/
+*.jpg
