@@ -7,32 +7,56 @@ body {
 	margin: 3em;
 }
 
-#login-box  {
-	margin: 0 auto;
-	text-align: left;
-	padding: 3em;
-	width: 400px;
+.yellow-box {
 	background-color: #F4D03F;
 	border-radius: 0px 
 	box-shadow: 5px 0px 5px -5px #999, -5px 0px 5px -5px #999;
+	text-align: left;
+	padding: 3em;
+	margin: 1em;
+	width: 400px;
+	height: 400px;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.yellow-box > img{
+	width: 150px;
+	float: right;
+	margin-top: 1em;
+}
+
+#whisperfeed-box > img {
+
+	margin-top: 3em;
+}
+
+.yellow-box > p{
+	clear: both;
+}
+
+
+
+
+.yellow-box > h2 {
+	margin-bottom: 1em;
+}
+
+#login-box  {
+	display: block;
+	margin: 0 auto;
+	margin-top: 1em;
+	height: auto;
 }
 
 #login-box > h2 {
-	display: inline;
-	float: left;
-	clear: none;
-	
+	margin-bottom: 1.5em;
 }
 
 #logo {
-	position: relative;
-	top: -20px;
-	display: inline;
 	float: right;
 	width: 150px;
-	clear: none;
+	position: relative;
+	top: -30px;
 }
 
-form {
-	padding-top: 1em;
-}
