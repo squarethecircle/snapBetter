@@ -10,6 +10,7 @@ httplib2==0.8
 itsdangerous==0.24
 logging==0.4.9.6
 numpy==1.8.1
+psycopg2==2.5.2
 pycrypto==2.6.1
 pycurl==7.19.3.1
 requests==2.2.1
