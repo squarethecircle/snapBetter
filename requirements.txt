@@ -11,7 +11,7 @@ itsdangerous==0.24
 logging==0.4.9.6
 numpy==1.8.1
 pycrypto==2.6.1
-pycurl==7.19.3.1
+pycurl==7.19.0
 requests==2.2.1
 requests-toolbelt==0.2.0
 urlgrabber==3.1.0
