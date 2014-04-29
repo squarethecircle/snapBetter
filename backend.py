@@ -8,7 +8,11 @@ import shutil
 import tempfile
 from Crypto.Cipher import AES
 import zipfile
-import numpy as np
+from numpy import asarray, amax
+from numpy.linalg import norm
+from PIL import Image
+from scipy.signal import fftconvolve
+
 # import cv2
 import shutil
 import uuid
@@ -19,7 +23,7 @@ from appdb import models
 from appdb import db
 from urlgrabber.keepalive import HTTPHandler
 import sha
- 
+
 APP_STATIC='static/'
 API_URL='https://feelinsonice-hrd.appspot.com/'
 AES_KEY='M02cnQ51Ji97vwT4'
@@ -307,10 +311,36 @@ def updateSeen(username, auth_token, added_friends_timestamp, snapid):
 		print r.content 
 		return False
 
+
 def captchaSolver(imagezip):
 	tempdir=tempfile.mkdtemp(dir=APP_STATIC)
 	imagezip.extractall(tempdir)
-	img1 = cv2.imread('ghost.png')
+	results=[]
+	for i in range(0,9):
+		curimg=asarray(Image.open(os.path.join(tempdir,'image'+str(i)+'.png')).convert('L'))
+		path=APP_STATIC+'img/captchas/ghost/'
+		ghostimgs=[os.path.join(path,fn) for fn in next(os.walk(path))[2] if fn[0]!='.']
+		ghostmaxnums=[]
+		for ghost in ghostimgs:
+			img=asarray(Image.open(ghost).convert('L'))
+			match=norm(img-curimg)
+			ghostmaxnums.append(match)
+			print [ghost,match]
+		path=APP_STATIC+'img/captchas/noghost/'
+		noghostmaxnums=[]
+		noghostimgs=[os.path.join(path,fn) for fn in next(os.walk(path))[2] if fn[0]!='.']
+		for noghost in noghostimgs:
+			img=asarray(Image.open(noghost).convert('L'))
+			match=norm(img-curimg)
+			noghostmaxnums.append(match)
+			print [noghost,match]
+		if min(ghostmaxnums)<min(noghostmaxnums):
+			results.append('1')
+		else:
+			results.append('0')
+	return ''.join(results)
+
+	"""img1 = cv2.imread('ghost.png')
 	sift = cv2.SIFT()
 	kp1, des1 = sift.detectAndCompute(img1,None)
 	averageDistance=[]
@@ -322,5 +352,6 @@ def captchaSolver(imagezip):
 		a=sorted(map(lambda x: x.distance,sum(matches,[])))
 		b=a[:10]
 		averageDistance.append(sum(b)/float(len(b)))
+	"""
 	shutil.rmtree(tempdir)
-	return ''.join(['1' if x else '0' for x in [distance<225 for distance in averageDistance]])
+	#return ''.join(['1' if x else '0' for x in [distance<225 for distance in averageDistance]])
