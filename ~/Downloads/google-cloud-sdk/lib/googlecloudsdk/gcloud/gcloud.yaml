@@ -1,0 +1,25 @@
+name: gcloud
+command_root_directory: [gcloud, sdktools, root]
+auth: false
+allow_non_existing_modules: true
+module_directories:
+  - name: auth
+    directory: [gcloud, sdktools, auth]
+  - name: components
+    directory: [gcloud, sdktools, components]
+  - name: config
+    directory: [gcloud, sdktools, config]
+  - name: preview
+    directory: [preview, commands]
+  - name: sql
+    directory: [sql, tools]
+  - name: dns
+    directory: [dns, dnstools]
+  - name: app
+    directory: [appengine, commands]
+  - name: datastore
+    directory: [appengine, datastore_commands]
+  - name: compute
+    directory: [compute, subcommands]
+  - name: endpoints
+    directory: [endpoints, commands]

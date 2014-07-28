@@ -1,1 +1,1 @@
-web: gunicorn snapbetter:app
+wf: python whisperfeed.py

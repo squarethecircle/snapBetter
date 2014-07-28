@@ -67,6 +67,7 @@ def register(username, email, password, age, birthday):
 	# return r.json()
  
 def login(username,password):
+<<<<<<< HEAD
 	#queryuser=models.User.query.filter_by(username=username).first()
 	#f queryuser==None:
 	#	newuser=models.User(username=username,password=password)
@@ -77,12 +78,34 @@ def login(username,password):
 	#	r=update(username, queryuser.token)
 	#	if (r!=False):
 	#		return r
+=======
+
+	queryuser=models.User.query.filter_by(username=username).first()
+	if queryuser==None:
+		newuser=models.User(username=username,password=password)
+		db.session.add(newuser)
+		db.session.commit()
+		queryuser=newuser
+	elif (queryuser.token!=None):
+		r=update(username, queryuser.token)
+
+		if (r!=False):
+			return r
+>>>>>>> 947259c3b8de3cfc13cb2cf0e8ea24d017ac67d8
 	params={'timestamp':int(time.time()),'req_token':request_token(STATIC_TOKEN,int(time.time())),'username':username,'password':password}
 	r=requests.post(API_URL+'bq/login',data=params,headers=HEADERS)
+	print r
 	if (r.json().get('logged')==False):
 		return False
+<<<<<<< HEAD
 	#queryuser.token=r.json().get('auth_token')
 	#db.session.commit()
+=======
+
+	queryuser.token=r.json().get('auth_token')
+	db.session.commit()
+
+>>>>>>> 947259c3b8de3cfc13cb2cf0e8ea24d017ac67d8
 	return r.json()
 
 def secret_snapta():
@@ -126,6 +149,7 @@ def whisperfeed():
 		r=login(WF_USERNAME,WF_PASSWORD)
 		at = r.get('auth_token')
 		added_friends = r['added_friends']
+		print r['added_friends']
 		for friend in added_friends:
 			makeFriend(WF_USERNAME, at, friend['name'])
 
@@ -163,7 +187,7 @@ def whisperfeed():
 		else:
 			limit+=100
 
-
+		sleep(43200)
 
 
 

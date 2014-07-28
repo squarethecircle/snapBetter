@@ -44,6 +44,7 @@ def login():
             # do risky stuff
             r = backend.login(request.form['username'], request.form['password'])
             if r != False:
+                print r
                 session['username'] = r['username']
                 session['auth_token'] = r['auth_token']
                 session['added_friends_timestamp'] = r['added_friends_timestamp']
