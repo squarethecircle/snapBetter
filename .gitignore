@@ -1,5 +1,1 @@
-flask
-*.pyc
-venv
-.elasticbeanstalk/
-*.jpg
+app.db
